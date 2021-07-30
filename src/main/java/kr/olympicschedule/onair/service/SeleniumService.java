@@ -9,7 +9,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -20,14 +19,10 @@ import java.util.stream.Collectors;
 public class SeleniumService {
 
     private WebDriver driver;
-    private LocalDate date;
+    private final LocalDate date;
 
     public SeleniumService(LocalDate date) {
         this.date = date;
-    }
-
-    @PostConstruct
-    public void init() {
         System.setProperty("webdriver.chrome.driver", "src/test/driver/chromedriver");
         driver = new ChromeDriver();
         driver.get(UrlUtil.createUrl(date));
@@ -41,38 +36,46 @@ public class SeleniumService {
         } catch (InterruptedException e) {
         }
 
-        List<Game> games = new ArrayList<>();
-        List<WebElement> GameElements = driver.findElements(By.className(HtmlClass.GAMES));
-        for (WebElement gameElement : GameElements) {
-            String[] title = getTitle(gameElement);
-            String event = title[0];
-            String detail = title[1];
-            LocalDateTime startTime = getStartTime(gameElement);
-            List<String> players = getPlayers(gameElement);
-            GameStatus gameStatus = getGameStatus(gameElement);
-            String videoLink = "";
-            boolean onAir = false;
+        try {
+            List<Game> games = new ArrayList<>();
+            List<WebElement> GameElements = driver.findElements(By.className(HtmlClass.GAMES));
+            for (WebElement gameElement : GameElements) {
+                String[] title = getTitle(gameElement);
+                String event = title[0];
+                String detail = title[1];
+                LocalDateTime startTime = getStartTime(gameElement);
+                List<String> players = getPlayers(gameElement);
+                GameStatus gameStatus = getGameStatus(gameElement);
+                String videoLink = "";
+                boolean onAir = false;
 
-            if (!gameStatus.equals(GameStatus.YET)) {
-                if (gameStatus.equals(GameStatus.PLAYING)) {
-                    onAir = true;
+                if (!gameStatus.equals(GameStatus.YET)) {
+                    if (gameStatus.equals(GameStatus.PLAYING)) {
+                        onAir = true;
+                    }
+                    videoLink = getVideoLink(gameElement);
                 }
-                videoLink = getVideoLink(gameElement);
+
+                Game game = Game.builder()
+                        .event(event)
+                        .detail(detail)
+                        .startTime(startTime)
+                        .players(players)
+                        .gameStatus(gameStatus)
+                        .videoLink(videoLink)
+                        .onAir(onAir)
+                        .build();
+
+                games.add(game);
             }
+            return games;
 
-            Game game = Game.builder()
-                    .event(event)
-                    .detail(detail)
-                    .startTime(startTime)
-                    .players(players)
-                    .gameStatus(gameStatus)
-                    .videoLink(videoLink)
-                    .onAir(onAir)
-                    .build();
+        } catch (Exception e) {
 
-            games.add(game);
+        } finally {
+            driver.quit();
         }
-        return games;
+        return null;
     }
 
     private String getVideoLink(WebElement gameElement) {
@@ -99,19 +102,20 @@ public class SeleniumService {
 
     private LocalDateTime getStartTime(WebElement gameElement) {
         String time = gameElement.findElement(By.className(HtmlClass.GAME_TIME)).getText();
-        int hour = Integer.parseInt(time.substring(0, time.indexOf(":")));
-        int minute = Integer.parseInt(time.substring(time.indexOf(":")));
+        int colonIndex = time.indexOf(":");
+        int hour = Integer.parseInt(time.substring(0, colonIndex));
+        int minute = Integer.parseInt(time.substring(colonIndex+1));
         return date.atTime(hour, minute);
     }
 
     private String[] getTitle(WebElement gameElement) {
         String title = gameElement.findElement(By.className(HtmlClass.GAME_TITLE)).getText();
-        return title.split(":");
+        int spaceIndex = title.indexOf(" ");
+        return new String[]{title.substring(0, spaceIndex), title.substring(spaceIndex+1)};
     }
-
 
     @PreDestroy
     public void close() {
-        driver.quit();
+
     }
 }
