@@ -5,9 +5,11 @@ import kr.olympicschedule.onair.domain.GameStatus;
 import kr.olympicschedule.onair.utill.HtmlClass;
 import kr.olympicschedule.onair.utill.UrlUtil;
 import org.openqa.selenium.By;
+import org.openqa.selenium.PageLoadStrategy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 
 import javax.annotation.PreDestroy;
 import java.time.LocalDate;
@@ -24,18 +26,14 @@ public class SeleniumService {
     public SeleniumService(LocalDate date) {
         this.date = date;
         System.setProperty("webdriver.chrome.driver", "src/test/driver/chromedriver");
-        driver = new ChromeDriver();
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.setPageLoadStrategy(PageLoadStrategy.EAGER);
+        driver = new ChromeDriver(chromeOptions);
         driver.get(UrlUtil.createUrl(date));
+
     }
 
     public List<Game> createCrawlingData() {
-        // Issue : 자바스크립트가 화면에 데이터를 그릴때까지 대기 -> 완료 되었을 때 크롤링하는 다른 함수 있지 않을까??
-
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
-
         try {
             List<Game> games = new ArrayList<>();
             List<WebElement> GameElements = driver.findElements(By.className(HtmlClass.GAMES));
@@ -49,7 +47,7 @@ public class SeleniumService {
                 String videoLink = "";
                 boolean onAir = false;
 
-                if (!gameStatus.equals(GameStatus.YET)) {
+                if (!gameStatus.equals(GameStatus.NOT_YET)) {
                     if (gameStatus.equals(GameStatus.PLAYING)) {
                         onAir = true;
                     }
@@ -88,7 +86,7 @@ public class SeleniumService {
         if (status.equals("경기종료")) {
             gameStatus = GameStatus.FINISHED;
         } else if (status.equals("경기 예정")) {
-            gameStatus = GameStatus.YET;
+            gameStatus = GameStatus.NOT_YET;
         } else {
             gameStatus = GameStatus.PLAYING;
         }

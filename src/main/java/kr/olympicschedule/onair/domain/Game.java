@@ -11,7 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Game {
-    private Long id;
+    private Long id; // 실제 DB key
     private LocalDateTime startTime; // 게임 시작 시간
     private String event; // 종목
     private String detail; // 종목 상세 정보

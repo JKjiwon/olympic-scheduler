@@ -11,7 +11,7 @@ import java.util.List;
 @SpringBootTest
 class SeleniumServiceTest {
 
-    SeleniumService seleniumService = new SeleniumService(LocalDate.now());
+    SeleniumService seleniumService = new SeleniumService(LocalDate.of(2021,7,31));
 
     @Test
     @DisplayName("크롤링 데이터 조회")
