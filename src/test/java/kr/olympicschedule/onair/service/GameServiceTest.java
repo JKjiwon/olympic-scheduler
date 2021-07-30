@@ -48,8 +48,7 @@ class GameServiceTest {
 
         try {
             Thread.sleep(1000);
-        } catch (InterruptedException e) {
-        }
+        } catch (InterruptedException e) { }
 
         List<WebElement> weGames = driver.findElements(By.className("GameScheduleList_game_item__2ricE"));
 
@@ -84,18 +83,16 @@ class GameServiceTest {
 
             } catch (Exception e) { }
 
-            if (onAir) {
-                status = GameStatus.PLAYING;
-            }
+
 
             Game ga = Game.builder()
                     .id(++id)
-                    .player(players)
+                    .players(players)
                     .startTime(startTime)
                     .event(event)
                     .detail(detail)
                     .onAir(onAir)
-                    .link(url)
+                    .videoLink(url)
                     .build();
 
             games.add(ga);
