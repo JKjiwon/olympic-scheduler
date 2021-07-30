@@ -24,7 +24,7 @@ public class SeleniumService {
     private final LocalDate date;
 
     public SeleniumService(LocalDate date) {
-        //2021.07.31 허영행 ChromeOption 추지
+        //2021.07.31 허영행 ChromeOption 추가
         this.date = date;
         System.setProperty("webdriver.chrome.driver", "src/test/driver/chromedriver");
         ChromeOptions chromeOptions = new ChromeOptions();
