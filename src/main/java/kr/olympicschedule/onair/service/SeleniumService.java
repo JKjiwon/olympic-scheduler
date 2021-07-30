@@ -24,6 +24,7 @@ public class SeleniumService {
     private final LocalDate date;
 
     public SeleniumService(LocalDate date) {
+        //2021.07.31 허영행 ChromeOption 추가
         this.date = date;
         System.setProperty("webdriver.chrome.driver", "src/test/driver/chromedriver");
         ChromeOptions chromeOptions = new ChromeOptions();
@@ -102,14 +103,14 @@ public class SeleniumService {
         String time = gameElement.findElement(By.className(HtmlClass.GAME_TIME)).getText();
         int colonIndex = time.indexOf(":");
         int hour = Integer.parseInt(time.substring(0, colonIndex));
-        int minute = Integer.parseInt(time.substring(colonIndex+1));
+        int minute = Integer.parseInt(time.substring(colonIndex + 1));
         return date.atTime(hour, minute);
     }
 
     private String[] getTitle(WebElement gameElement) {
         String title = gameElement.findElement(By.className(HtmlClass.GAME_TITLE)).getText();
         int spaceIndex = title.indexOf(" ");
-        return new String[]{title.substring(0, spaceIndex), title.substring(spaceIndex+1)};
+        return new String[]{title.substring(0, spaceIndex), title.substring(spaceIndex + 1)};
     }
 
     @PreDestroy
